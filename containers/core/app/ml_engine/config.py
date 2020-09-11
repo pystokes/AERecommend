@@ -22,6 +22,8 @@ class Config(object):
         _train_input_dir = '../../../../../_data_storage/barcode/barcodes_00010/train/normal/'
         _train_save_dir = None
         _train_split_ratio = 0.7 # Ratio of train data
+        # Requirements : webapp
+        _debug_mode = True
 
         self.model = {
             # General
@@ -60,6 +62,7 @@ class Config(object):
 
         self.detect = {
             'trained_weight_path': '',
+            'debug_mode': _debug_mode,
             'visualize': True,
             'save_results': True,
         }

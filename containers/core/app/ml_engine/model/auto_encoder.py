@@ -39,6 +39,7 @@ class AutoEncoder(nn.Module):
         self.encoder = Encoder()
         self.decoder = Decoder(self.l_relu_factor)
 
+    @stop_watch
     def forward(self, x):
 
         x = self.encoder(x)

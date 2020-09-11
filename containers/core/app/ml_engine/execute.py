@@ -16,6 +16,7 @@ from pathlib import Path
 
 # Third party library
 from attrdict import AttrDict
+import numpy as np
 import torch
 
 # Original library
@@ -153,8 +154,53 @@ class Executor(object):
         detector.run(data_loader)
     
 
-    def webcam(self):
-        pass
+    def webapp(self, trained_model, device, like_images, class_centers):
+        """
+        like_images must be [N(>0) x C(3:RGB) x H(224) x W(224)] and in the range of [0, 1.0]
+        """
+        # Inference
+        trained_model.eval()
+        with torch.no_grad():
+
+            inputs = torch.ToTensor(like_images).to(device)
+            outputs = trained_model(inputs)
+        
+        # 
+
+
+        # Calculate redommendation
+        if self.config.detect.debug_mode:
+
+            # Config of prepared data
+            n_class = 165
+            dim_feature = 512 * 13 * 13 # Based on SqueezeNet
+            # Config of each user data
+            n_like = 10
+
+            # Set dummy data
+            class_centers = np.random.randn(n_class * dim_feature).reshape(n_class, dim_feature)
+            like_images = np.random.randn(n_like * dim_feature).reshape(n_like, dim_feature)
+
+        ids_in_class = {}
+        for i_class in range(len(class_centers)):
+            ids_in_class[i_class] = [f'{i_class}-{id}' for id in range(100)]
+
+        # Center of user
+        user_center = like_images.sum(axis=0) / len(like_images)
+
+        # Calculate distances between user center and each class center
+        distances = []
+        for i_class in range(len(class_centers)):
+            diff = user_center - class_centers[i_class]
+            squared_diff = np.square(diff)
+            discrete_dist = np.sqrt(squared_diff.sum())
+            distances.append(discrete_dist)
+
+        # Random selection from nearest class
+        arg_min = np.argmin(distances)
+        recommend = random.sample(ids_in_class[arg_min], 10)
+
+        return recommend
         
 
 if __name__ == '__main__':
@@ -222,5 +268,5 @@ if __name__ == '__main__':
         elif args.exec_type == 'detect':
             executor.detect(model, device, args.x_dir, args.y_dir)
         
-        elif args.exec_type == 'webcam':
+        elif args.exec_type == 'webapp':
             pass
