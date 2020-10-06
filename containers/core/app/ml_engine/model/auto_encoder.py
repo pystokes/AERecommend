@@ -45,7 +45,7 @@ class AutoEncoder(nn.Module):
         x = self.encoder(x)
 
         if self.exec_type == 'detect':
-            return x
+            return x.view(x.size(0), -1)
 
         x = self.decoder(x)        
 

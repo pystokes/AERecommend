@@ -8,6 +8,14 @@ from utils.common import Utils as utils
 
 app = Flask(__name__)
 
+# Run one-time processes
+    config = utils.load_config(json_data['config_path'])
+    executor = Executor(json_data['exec_type'], config, json_data['y_dir'])
+
+    model, device = executor.load_model(json_data['gpu_id'])
+
+
+
 @app.route('/', methods=['GET'])
 def check_from_brawser():
     """
@@ -15,7 +23,7 @@ def check_from_brawser():
     """
     return 'Application server return response correctly.'
 
-@app.route('/api/agritech/store_image', methods=['POST'])
+@app.route('/api/aerecommend/store_image', methods=['POST'])
 def store_image():
 
     try:
@@ -33,26 +41,42 @@ def store_image():
                               'status_code': 500,
                               'message': 'Failed to save image.'})
 
-@app.route('/api/agritech/preprocess', methods=['POST'])
+@app.route('/api/aerecommend/preprocess', methods=['POST'])
 def preprocess():
 
     res = utils.check_content_type_json(request)
     return res
 
-@app.route('/api/agritech/train', methods=['POST'])
+@app.route('/api/aerecommend/train', methods=['POST'])
 def train():
 
     res = utils.check_content_type_json(request)
     return res
 
-@app.route('/api/agritech/evaluate', methods=['POST'])
+@app.route('/api/aerecommend/evaluate', methods=['POST'])
 def evaluate():
 
     res = utils.check_content_type_json(request)
     return res
 
-@app.route('/api/agritech/predict', methods=['POST'])
+@app.route('/api/aerecommend/predict', methods=['POST'])
 def predict():
+
+    res = utils.check_content_type_json(request)
+
+    json_data = request.get_json()
+
+    print(model)
+    print(device)
+    
+    """
+    ADD PROCESS TO DETECT HERE
+    """
+
+    return res
+
+@app.route('/api/aerecommend/webapp', methods=['POST'])
+def webapp():
 
     res = utils.check_content_type_json(request)
 
@@ -70,7 +94,6 @@ def predict():
     """
 
     return res
-
 
 if __name__ == '__main__':
     app.run(debug=True, host='0.0.0.0')

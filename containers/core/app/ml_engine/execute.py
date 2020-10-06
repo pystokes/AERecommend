@@ -13,6 +13,7 @@ import json
 from logging import DEBUG, INFO
 from logging import getLogger, StreamHandler, FileHandler, Formatter
 from pathlib import Path
+import random
 
 # Third party library
 from attrdict import AttrDict
@@ -154,7 +155,7 @@ class Executor(object):
         detector.run(data_loader)
     
 
-    def webapp(self, trained_model, device, like_images, class_centers):
+    def webapp(self, trained_model, device, like_images, class_centers, ids_in_class):
         """
         like_images must be [N(>0) x C(3:RGB) x H(224) x W(224)] and in the range of [0, 1.0]
         """
@@ -163,10 +164,7 @@ class Executor(object):
         with torch.no_grad():
 
             inputs = torch.ToTensor(like_images).to(device)
-            outputs = trained_model(inputs)
-        
-        # 
-
+            like_images = trained_model(inputs)
 
         # Calculate redommendation
         if self.config.detect.debug_mode:
@@ -181,9 +179,9 @@ class Executor(object):
             class_centers = np.random.randn(n_class * dim_feature).reshape(n_class, dim_feature)
             like_images = np.random.randn(n_like * dim_feature).reshape(n_like, dim_feature)
 
-        ids_in_class = {}
-        for i_class in range(len(class_centers)):
-            ids_in_class[i_class] = [f'{i_class}-{id}' for id in range(100)]
+            ids_in_class = {}
+            for i_class in range(len(class_centers)):
+                ids_in_class[i_class] = [f'{i_class}-{id}' for id in range(100)]
 
         # Center of user
         user_center = like_images.sum(axis=0) / len(like_images)
